@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 
-const LILO_IMAGES = Array.from({ length: 35 }, (_, i) => `/img/Lilo/foto${i + 1}.jpg`);
+const LILO_IMAGES = Array.from({ length: 35 }, (_, i) => `/img/Lilo/Foto${i + 1}.jpg`);
 
 type Message = {
   sender: 'user' | 'lilo'
