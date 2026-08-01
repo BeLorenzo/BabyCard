@@ -54,7 +54,7 @@ export default function GiftCard({ saldo = 0 }) {
           <div className="absolute top-0 left-0 w-full h-[150%] bg-gradient-to-b from-white/20 to-transparent -rotate-45 -translate-y-10 -translate-x-10 pointer-events-none" />
           
           <div className="flex justify-between items-start z-10 relative">
-            <span className="font-bold tracking-widest text-lg opacity-90 drop-shadow-sm">BABYPAL ✨</span>
+            <span className="font-bold tracking-widest text-lg opacity-90 drop-shadow-sm">BABYPAL 2.0 ✨</span>
             <div className="w-10 sm:w-12 h-7 sm:h-9 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-md border border-yellow-500/50 flex flex-col justify-center items-center gap-1 overflow-hidden shadow-sm">
               <div className="w-full h-[1px] bg-yellow-600/30"></div>
               <div className="w-full h-[1px] bg-yellow-600/30"></div>

@@ -27,7 +27,7 @@ export default function Navbar() {
           onClick={() => setIsOpen(false)}
           className="font-extrabold text-xl tracking-tight text-[var(--rose-dark)] flex items-center gap-1 hover:opacity-80 transition-opacity"
         >
-          BabyPal ✨
+          BabyPal 2.0 ✨
         </Link>
         
         {/* MENU DESKTOP (nascosto su schermi piccoli) */}
