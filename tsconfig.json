@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "app/home-s3gr3ta-2026/components/BookLibreria.jsx"  ],
   "exclude": ["node_modules"]
 }

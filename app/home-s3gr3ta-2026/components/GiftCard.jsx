@@ -44,7 +44,7 @@ export default function GiftCard({ saldo = 0 }) {
         
         {/* ================= FRONTE ================= */}
         <div 
-          className="absolute inset-0 w-full h-full rounded-2xl p-5 sm:p-6 text-white shadow-2xl flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[var(--rose-light)] via-[var(--rose-gold)] to-[var(--rose-dark)] border border-white/20"
+          className="absolute inset-0 w-full h-full rounded-2xl p-5 sm:p-6 text-white shadow-2xl shadow-[var(--rose-dark)]/30 flex flex-col justify-between overflow-hidden bg-gradient-to-br from-pink-400 via-[var(--rose-dark)] to-purple-900 border border-white/20"
           style={{ 
             WebkitBackfaceVisibility: 'hidden', 
             backfaceVisibility: 'hidden',

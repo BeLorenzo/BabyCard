@@ -3,10 +3,11 @@
 :root {
   /* I nostri colori base */
   --brand-bg: #FCFBF9;     /* Bianco panna caldo */
-  --brand-text: #2D3748;   /* Grigio ardesia (niente nero puro) */
-  --rose-light: #F2C6C2;
+  --brand-text: #111827;   /* Grigio ardesia (niente nero puro) */
+  --rose-light: #FBCFE8;
   --rose-gold: #D9A09B;
-  --rose-dark: #B87A75;
+  --rose-dark: #DA1884;
+  --brand-bg: #FCF9FA;
 }
 
 @theme inline {
