@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { sendBookRequestAlert } from '../../actions/notify'; // Controlla che il percorso sia giusto
 
 type BookRequest = {
   id: number;
@@ -77,6 +78,13 @@ export default function BookLibreria() {
     if (error) {
       alert('Errore nel salvataggio.');
     } else {
+      
+      // --- INVIO NOTIFICA ---
+      const textMessage = `📚 *Nuova Richiesta Libro!*\n\n*Titolo:* ${title}\n*Autore:* ${author}\n*Formato:* ${format}\n*Lingua:* ${language}`;
+      
+      // Chiamata non bloccante per non rallentare l'UI di Alessia
+      sendBookRequestAlert(textMessage).catch(console.error);
+
       setSearchQuery('');
       setSearchResults([]);
       fetchRequests();
@@ -119,8 +127,8 @@ export default function BookLibreria() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
 
-      {/* COLONNA SX: RICERCA */}
-      <section className="md:col-span-1 bg-white p-7 rounded-3xl shadow-sm border border-gray-100 sticky top-8">
+      {/* COLONNA SX: RICERCA (Rimosso sticky e top-8) */}
+      <section className="md:col-span-1 bg-white p-7 rounded-3xl shadow-sm border border-gray-100">
         <h2 className="text-2xl font-bold text-[var(--brand-text)] mb-6">Nuova Richiesta</h2>
 
         <form onSubmit={handleSearch} className="flex flex-col gap-4 mb-6">

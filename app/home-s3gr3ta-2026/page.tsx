@@ -1,6 +1,6 @@
 import GiftCard from './components/GiftCard';
 import RelationshipStatus from './components/RelationshipStatus';
-import EmergencyButton from './components/EmergencyButton'; // 1. Importa il bottone
+import EmergencyButton from './components/EmergencyButton'; 
 import { supabase } from './lib/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -60,7 +60,8 @@ export default async function Home() {
                     key={voucher.id} 
                     className="group relative bg-white rounded-xl shadow-sm border border-gray-100 p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer overflow-hidden"
                   >
-                    <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-[var(--rose-light)] to-[var(--rose-gold)]"></div>
+                    {/* BORDINO COLORATO AGGIORNATO AL NUOVO STILE DELLA CARD */}
+                    <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-pink-400 via-[var(--rose-dark)] to-purple-900"></div>
                     
                     <div className="pl-2">
                       <h3 className="font-bold text-lg text-[var(--brand-text)] leading-tight mb-1">
@@ -91,7 +92,7 @@ export default async function Home() {
         </section>
       </div>
 
-      {/* 2. Il Pulsante di Emergenza a fondo pagina */}
+      {/* Il Pulsante di Emergenza a fondo pagina */}
       <section className="w-full max-w-md mx-auto mt-12 pt-8 border-t border-gray-200/60">
         <div className="text-center mb-4">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Opzioni estreme</p>

@@ -67,7 +67,7 @@ export default function LiloBot() {
                 key={i} 
                 className={`shrink-0 max-w-[85%] rounded-xl text-sm shadow-sm overflow-hidden ${
                   msg.sender === 'user' 
-                    ? 'px-3 py-2 bg-[var(--rose-gold)] text-white self-end rounded-br-none' 
+                    ? 'px-3 py-2 bg-[var(--rose-dark)] text-white self-end rounded-br-none' 
                     : 'bg-white border border-gray-200 text-gray-800 self-start rounded-bl-none'
                 }`}
               >
@@ -85,7 +85,7 @@ export default function LiloBot() {
             {isTyping && (
               <div className="shrink-0 max-w-[80%] p-3 bg-white border border-gray-200 self-start rounded-xl rounded-bl-none shadow-sm flex items-center gap-1">
                 <div className="w-2 h-2 bg-[var(--rose-light)] rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-[var(--rose-gold)] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 <div className="w-2 h-2 bg-[var(--rose-dark)] rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
               </div>
             )}
@@ -97,12 +97,12 @@ export default function LiloBot() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Scrivi qualcosa..." 
-              className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--rose-gold)]"
+              className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--rose-dark)]"
             />
             <button 
               type="submit" 
               disabled={isTyping}
-              className="bg-[var(--rose-dark)] text-white rounded-full w-9 h-9 flex items-center justify-center hover:bg-[var(--rose-gold)] transition-colors disabled:opacity-50 shrink-0"
+              className="bg-[var(--rose-dark)] text-white rounded-full w-9 h-9 flex items-center justify-center hover:opacity-80 transition-opacity disabled:opacity-50 shrink-0"
             >
               ↑
             </button>
@@ -114,11 +114,12 @@ export default function LiloBot() {
         onClick={() => setIsOpen(!isOpen)}
         className="relative w-20 h-20 hover:scale-105 transition-transform group"
       >
-        <div className="absolute inset-0 bg-[var(--rose-light)] rounded-full border-4 border-white shadow-xl z-0 transition-colors group-hover:bg-[var(--rose-gold)]"></div>
+        {/* Cerchio di sfondo: ora usa il rosa forte e pieno */}
+        <div className="absolute inset-0 bg-[var(--rose-dark)] rounded-full border-4 border-white shadow-xl z-0 transition-colors group-hover:bg-opacity-80"></div>
         <img 
           src="/img/Lilo/lilo-sticker.png" 
           alt="Lilo" 
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[115%] max-w-none z-10 drop-shadow-md pointer-events-none text-[8px] text-center text-[var(--rose-dark)]"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[115%] max-w-none z-10 drop-shadow-md pointer-events-none"
         />
       </button>
     </div>

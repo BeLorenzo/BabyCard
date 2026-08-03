@@ -12,7 +12,7 @@ export default function LibreriaPage() {
           La <span className="text-[var(--rose-dark)]">Libreria</span> della Baby
         </h1>
         <p className="text-sm md:text-base opacity-70 max-w-md mx-auto">
-          Cerca un titolo, fai la richiesta e attendi che il file magico appaia su Telegram/WhatsApp.
+          Cerca un titolo, fai la richiesta e attendi che il file appaia magicamente in libreria per poterlo scaricare.
         </p>
       </header>
 

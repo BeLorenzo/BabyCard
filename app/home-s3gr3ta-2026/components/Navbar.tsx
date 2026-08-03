@@ -18,14 +18,14 @@ export default function Navbar() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/70 border-b border-gray-200/60 shadow-sm">
+    <nav className="sticky top-0 z-40 w-full backdrop-blur-md bg-gradient-to-r from-[var(--rose-light)]/40 via-white/60 to-[var(--rose-light)]/40 border-b border-[var(--rose-light)] shadow-sm">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         
         {/* Logo - Rimanda alla dashboard segreta */}
         <Link 
           href={SECRET_PATH} 
           onClick={() => setIsOpen(false)}
-          className="font-extrabold text-xl tracking-tight text-[var(--rose-dark)] flex items-center gap-1 hover:opacity-80 transition-opacity"
+          className="font-extrabold text-xl tracking-tight text-[var(--rose-dark)] flex items-center gap-1 hover:opacity-80 transition-opacity drop-shadow-sm"
         >
           BabyPal 2.0 ✨
         </Link>
@@ -37,7 +37,7 @@ export default function Navbar() {
             className={`flex items-center gap-1.5 transition-colors pb-1 border-b-2 ${
               isActive(`${SECRET_PATH}/wishlist`) 
                 ? 'border-[var(--rose-dark)] text-[var(--rose-dark)]' 
-                : 'border-transparent text-gray-500 hover:text-[var(--brand-text)]'
+                : 'border-transparent text-gray-600 hover:text-[var(--rose-dark)]'
             }`}
           >
             <span>Wishlist e ToDo</span>
@@ -48,19 +48,18 @@ export default function Navbar() {
             className={`flex items-center gap-1.5 transition-colors pb-1 border-b-2 ${
               isActive(`${SECRET_PATH}/randomizer`) 
                 ? 'border-[var(--rose-dark)] text-[var(--rose-dark)]' 
-                : 'border-transparent text-gray-500 hover:text-[var(--brand-text)]'
+                : 'border-transparent text-gray-600 hover:text-[var(--rose-dark)]'
             }`}
           >
             <span>Aiuto nelle scelte</span>
           </Link>
 
-          {/* NUOVO LINK LIBRERIA DESKTOP */}
           <Link 
             href={`${SECRET_PATH}/libreria`} 
             className={`flex items-center gap-1.5 transition-colors pb-1 border-b-2 ${
               isActive(`${SECRET_PATH}/libreria`) 
                 ? 'border-[var(--rose-dark)] text-[var(--rose-dark)]' 
-                : 'border-transparent text-gray-500 hover:text-[var(--brand-text)]'
+                : 'border-transparent text-gray-600 hover:text-[var(--rose-dark)]'
             }`}
           >
             <span>Libreria</span>
@@ -70,7 +69,7 @@ export default function Navbar() {
         {/* BOTTONE HAMBURGER MOBILE (visibile solo su schermi piccoli) */}
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className="md:hidden p-2 text-[var(--rose-dark)] focus:outline-none"
+          className="md:hidden p-2 text-[var(--rose-dark)] focus:outline-none hover:bg-white/50 rounded-lg transition-colors"
         >
           {isOpen ? (
             <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,14 +85,14 @@ export default function Navbar() {
 
       {/* TENDINA MENU MOBILE */}
       {isOpen && (
-        <div className="md:hidden absolute top-16 left-0 w-full bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-lg px-4 pt-6 pb-8 flex flex-col gap-5 items-center">
+        <div className="md:hidden absolute top-16 left-0 w-full bg-gradient-to-r from-[var(--rose-light)]/95 via-white/95 to-[var(--rose-light)]/95 backdrop-blur-xl border-b border-[var(--rose-light)] shadow-2xl px-4 pt-6 pb-8 flex flex-col gap-5 items-center">
           <Link 
             href={`${SECRET_PATH}/wishlist`} 
             onClick={() => setIsOpen(false)}
-            className={`font-bold text-sm transition-all pb-1 border-b-2 ${
+            className={`font-bold text-base transition-all pb-1 border-b-2 ${
               isActive(`${SECRET_PATH}/wishlist`) 
                 ? 'border-[var(--rose-dark)] text-[var(--rose-dark)]' 
-                : 'border-transparent text-[var(--rose-dark)]/70 hover:text-[var(--rose-dark)]'
+                : 'border-transparent text-gray-600 hover:text-[var(--rose-dark)]'
             }`}
           >
             Wishlist
@@ -101,23 +100,22 @@ export default function Navbar() {
           <Link 
             href={`${SECRET_PATH}/randomizer`} 
             onClick={() => setIsOpen(false)}
-            className={`font-bold text-sm transition-all pb-1 border-b-2 ${
+            className={`font-bold text-base transition-all pb-1 border-b-2 ${
               isActive(`${SECRET_PATH}/randomizer`) 
                 ? 'border-[var(--rose-dark)] text-[var(--rose-dark)]' 
-                : 'border-transparent text-[var(--rose-dark)]/70 hover:text-[var(--rose-dark)]'
+                : 'border-transparent text-gray-600 hover:text-[var(--rose-dark)]'
             }`}
           >
             Decisioni
           </Link>
 
-          {/* NUOVO LINK LIBRERIA MOBILE */}
           <Link 
             href={`${SECRET_PATH}/libreria`} 
             onClick={() => setIsOpen(false)}
-            className={`font-bold text-sm transition-all pb-1 border-b-2 ${
+            className={`font-bold text-base transition-all pb-1 border-b-2 ${
               isActive(`${SECRET_PATH}/libreria`) 
                 ? 'border-[var(--rose-dark)] text-[var(--rose-dark)]' 
-                : 'border-transparent text-[var(--rose-dark)]/70 hover:text-[var(--rose-dark)]'
+                : 'border-transparent text-gray-600 hover:text-[var(--rose-dark)]'
             }`}
           >
             Libreria

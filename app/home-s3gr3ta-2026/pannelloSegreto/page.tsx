@@ -24,6 +24,7 @@ export default function AdminPanel() {
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [editingId, setEditingId] = useState<number | null>(null); // Nuovo stato per la modifica
   const [saldo, setSaldo] = useState(0);
   const [isUpdatingSaldo, setIsUpdatingSaldo] = useState(false);
 
@@ -56,13 +57,36 @@ export default function AdminPanel() {
     alert('Saldo aggiornato!');
   };
 
-  const addVoucher = async (e: React.FormEvent) => {
+  // Funzione unificata per salvare (creare o modificare) un voucher
+  const handleSaveVoucher = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !description) return;
-    await supabase.from('vouchers').insert([{ title, description }]);
+
+    if (editingId) {
+      // Modifica voucher esistente
+      await supabase.from('vouchers').update({ title, description }).eq('id', editingId);
+    } else {
+      // Crea nuovo voucher
+      await supabase.from('vouchers').insert([{ title, description }]);
+    }
+
+    // Reset dei campi
     setTitle('');
     setDescription('');
+    setEditingId(null);
     fetchVouchers();
+  };
+
+  const startEditing = (v: Voucher) => {
+    setEditingId(v.id);
+    setTitle(v.title);
+    setDescription(v.description);
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setTitle('');
+    setDescription('');
   };
 
   const deleteVoucher = async (id: number) => {
@@ -81,18 +105,25 @@ export default function AdminPanel() {
     if (data) setPendingBooks(data as BookRequest[]);
   };
 
+  const formatDriveLink = (rawUrl: string) => {
+    const match = rawUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+      return `https://drive.google.com/uc?export=download&id=${match[1]}`;
+    }
+    return rawUrl;
+  };
+
   const handleApproveBook = async (id: number) => {
-    const url = links[id];
-    if (!url) return alert("Devi inserire il link di Google Drive prima di approvare!");
+    const rawUrl = links[id];
+    if (!rawUrl) return alert("Devi inserire il link di Google Drive prima di approvare!");
 
     const { error } = await supabase
       .from('book_requests')
-      .update({ status: 'READY', download_url: url })
+      .update({ status: 'READY', download_url: rawUrl })
       .eq('id', id);
       
     if (!error) {
       fetchPendingBooks();
-      // Pulisce l'input del link per quell'ID specifico
       setLinks(prev => { const newLinks = {...prev}; delete newLinks[id]; return newLinks; });
     } else {
       alert("Errore durante l'approvazione del libro.");
@@ -124,9 +155,18 @@ export default function AdminPanel() {
             </button>
           </form>
 
-          {/* GESTIONE VOUCHER */}
-          <form onSubmit={addVoucher} className="bg-white p-6 rounded-xl shadow-sm flex flex-col gap-4 border border-gray-200">
-            <h2 className="font-bold text-xl text-[var(--brand-text)]">Nuovo Voucher</h2>
+          {/* GESTIONE VOUCHER (Creazione/Modifica) */}
+          <form onSubmit={handleSaveVoucher} className="bg-white p-6 rounded-xl shadow-sm flex flex-col gap-4 border border-gray-200">
+            <div className="flex justify-between items-center">
+              <h2 className="font-bold text-xl text-[var(--brand-text)]">
+                {editingId ? 'Modifica Voucher' : 'Nuovo Voucher'}
+              </h2>
+              {editingId && (
+                <button type="button" onClick={cancelEditing} className="text-xs text-gray-400 hover:text-gray-600 font-bold">
+                  Annulla Modifica ✕
+                </button>
+              )}
+            </div>
             <input 
               type="text" placeholder="Titolo (es. Giropizza)" value={title} onChange={(e) => setTitle(e.target.value)}
               className="border border-gray-200 p-3 rounded-lg w-full bg-gray-50 outline-none focus:ring-2 focus:ring-[var(--rose-light)]" required 
@@ -135,8 +175,8 @@ export default function AdminPanel() {
               placeholder="Descrizione (es. Valido per una giropizzata)" value={description} onChange={(e) => setDescription(e.target.value)}
               className="border border-gray-200 p-3 rounded-lg w-full bg-gray-50 outline-none focus:ring-2 focus:ring-[var(--rose-light)]" rows={3} required 
             />
-            <button type="submit" className="bg-gray-800 text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors">
-              Crea Voucher
+            <button type="submit" className={`${editingId ? 'bg-[var(--rose-dark)]' : 'bg-gray-800'} text-white font-bold py-3 rounded-lg hover:bg-opacity-90 transition-colors`}>
+              {editingId ? 'Salva Modifiche' : 'Crea Voucher'}
             </button>
           </form>
 
@@ -145,16 +185,21 @@ export default function AdminPanel() {
             <h2 className="font-bold text-xl mb-4 text-[var(--brand-text)]">Voucher Esistenti</h2>
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
               {vouchers.map(v => (
-                <div key={v.id} className="p-3 rounded-lg border border-gray-100 flex justify-between items-center hover:bg-gray-50 transition-colors">
+                <div key={v.id} className={`p-3 rounded-lg border flex justify-between items-center transition-colors ${editingId === v.id ? 'border-[var(--rose-dark)] bg-rose-50' : 'border-gray-100 hover:bg-gray-50'}`}>
                   <div className="flex-1 min-w-0 pr-4">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded mr-2 align-middle ${v.is_used ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
                       {v.is_used ? 'USATO' : 'ATTIVO'}
                     </span>
                     <strong className="text-sm text-gray-800 truncate block sm:inline-block mt-1 sm:mt-0">{v.title}</strong>
                   </div>
-                  <button onClick={() => deleteVoucher(v.id)} className="text-gray-400 hover:text-red-500 transition-colors">
-                    🗑️
-                  </button>
+                  <div className="flex gap-3">
+                    <button onClick={() => startEditing(v)} className="text-gray-400 hover:text-[var(--rose-dark)] transition-colors" title="Modifica">
+                      ✏️
+                    </button>
+                    <button onClick={() => deleteVoucher(v.id)} className="text-gray-400 hover:text-red-500 transition-colors" title="Elimina">
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
