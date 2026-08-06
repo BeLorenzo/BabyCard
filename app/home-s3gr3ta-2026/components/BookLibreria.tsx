@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { sendBookRequestAlert } from '../../actions/notify'; // Controlla che il percorso sia giusto
+import { sendBookRequestAlert } from '../../actions/notify';
 
 type BookRequest = {
   id: number;
@@ -20,6 +20,7 @@ export default function BookLibreria() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [message, setMessage] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
   
   // Stati per la nuova richiesta
   const [format, setFormat] = useState<'EPUB' | 'AUDIO'>('EPUB');
@@ -42,35 +43,98 @@ export default function BookLibreria() {
     if (data) setRequests(data);
   };
 
+  //Se con API GOOGLE non va rimettiamo questa che usa ancora openLibrary ma ha fallback con richiesta
+/*
+const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setIsSearching(true);
+    setHasSearched(true);
+    setSearchResults([]);
+    setMessage('');
+
+    try {
+      // Torniamo alla vecchia, cara e affidabile Open Library API
+      const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(searchQuery)}&limit=10`;
+      const res = await fetch(url);
+      
+      if (!res.ok) throw new Error('Network response was not ok');
+      
+      const data = await res.json();
+
+      if (data.docs && data.docs.length > 0) {
+        // Filtriamo per sicurezza quelli senza titolo
+        const validBooks = data.docs.filter((b: any) => b.title);
+        
+        if (validBooks.length > 0) {
+          // Mappiamo i dati per uniformarli alla nostra interfaccia
+          const mappedBooks = validBooks.map((item: any) => ({
+            key: item.key || Math.random().toString(),
+            title: item.title,
+            author_name: item.author_name || ['Autore sconosciuto'],
+            cover_url: item.cover_i ? `https://covers.openlibrary.org/b/id/${item.cover_i}-M.jpg` : '',
+          }));
+          setSearchResults(mappedBooks);
+        } else {
+          setMessage('Nessun libro trovato. Usa il bottone qui sotto per fare la richiesta manualmente.');
+        }
+      } else {
+        setMessage('Nessun libro trovato. Usa il bottone qui sotto per fare la richiesta manualmente.');
+      }
+    } catch (error) {
+      setMessage('Errore di connessione durante la ricerca.');
+    }
+    setIsSearching(false);
+  };
+*/
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 
     setIsSearching(true);
+    setHasSearched(true);
     setSearchResults([]);
     setMessage('');
 
     try {
-      const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(searchQuery)}&limit=10`;
+      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_BOOKS_API_KEY;
+      
+      if (!apiKey) {
+        setMessage('Errore: API Key di Google Books mancante nel file .env');
+        setIsSearching(false);
+        return;
+      }
+
+      // Ricerca su Google Books con la API Key
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(searchQuery)}&maxResults=10&key=${apiKey}`;
       const res = await fetch(url);
+      
+      if (!res.ok) throw new Error('Errore nella risposta di Google Books');
+      
       const data = await res.json();
 
-      if (data.docs && data.docs.length > 0) {
-        setSearchResults(data.docs.filter((b: any) => b.title));
+      if (data.items && data.items.length > 0) {
+        // Mappiamo i risultati di Google per renderli compatibili con la nostra UI
+        const mappedBooks = data.items.map((item: any) => ({
+          key: item.id,
+          title: item.volumeInfo.title || 'Titolo sconosciuto',
+          author_name: item.volumeInfo.authors || ['Autore sconosciuto'],
+          cover_url: item.volumeInfo.imageLinks?.thumbnail ? item.volumeInfo.imageLinks.thumbnail.replace('http:', 'https:') : '',
+        }));
+        setSearchResults(mappedBooks);
       } else {
-        setMessage('Nessun libro trovato.');
+        setMessage('Nessun libro trovato. Usa il bottone qui sotto per fare la richiesta manualmente.');
       }
     } catch (error) {
-      setMessage('Errore di connessione.');
+      console.error(error);
+      setMessage('Errore di connessione durante la ricerca.');
     }
     setIsSearching(false);
   };
 
-  const addRequest = async (book: any, format: string, language: string) => {
-    const title = book.title;
-    const author = book.author_name ? book.author_name[0] : 'Autore sconosciuto';
-    const cover_url = book.cover_i ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg` : '';
-
+  const saveToDatabaseAndNotify = async (title: string, author: string, cover_url: string) => {
     const { error } = await supabase
       .from('book_requests')
       .insert([{ title, author, cover_url, format, language, status: 'PENDING' }]);
@@ -78,17 +142,28 @@ export default function BookLibreria() {
     if (error) {
       alert('Errore nel salvataggio.');
     } else {
-      
-      // --- INVIO NOTIFICA ---
+      // Notifica Telegram
       const textMessage = `📚 *Nuova Richiesta Libro!*\n\n*Titolo:* ${title}\n*Autore:* ${author}\n*Formato:* ${format}\n*Lingua:* ${language}`;
-      
-      // Chiamata non bloccante per non rallentare l'UI di Alessia
       sendBookRequestAlert(textMessage).catch(console.error);
 
       setSearchQuery('');
       setSearchResults([]);
+      setHasSearched(false);
+      setMessage('');
       fetchRequests();
     }
+  };
+
+  const addRequest = (book: any) => {
+    const title = book.title;
+    const author = book.author_name[0];
+    const cover_url = book.cover_url;
+    saveToDatabaseAndNotify(title, author, cover_url);
+  };
+
+  const addManualRequest = () => {
+    if (!searchQuery.trim()) return;
+    saveToDatabaseAndNotify(searchQuery.trim(), 'Autore non specificato', '');
   };
 
   const deleteRequest = async (id: number) => {
@@ -113,7 +188,6 @@ export default function BookLibreria() {
 
   const pendingBooks = requests.filter(r => r.status === 'PENDING' || !r.status);
   
-  // Logica di filtraggio per la libreria
   const readyBooks = requests.filter(r => r.status === 'READY');
   const filteredReadyBooks = readyBooks.filter(book => {
     const matchesText = book.title.toLowerCase().includes(libFilterText.toLowerCase()) || 
@@ -127,7 +201,7 @@ export default function BookLibreria() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
 
-      {/* COLONNA SX: RICERCA (Rimosso sticky e top-8) */}
+      {/* COLONNA SX: RICERCA */}
       <section className="md:col-span-1 bg-white p-7 rounded-3xl shadow-sm border border-gray-100">
         <h2 className="text-2xl font-bold text-[var(--brand-text)] mb-6">Nuova Richiesta</h2>
 
@@ -174,7 +248,7 @@ export default function BookLibreria() {
         </div>
 
         <div className="space-y-3 max-h-[45vh] overflow-y-auto pr-2">
-          {!isSearching && searchResults.length === 0 && !message && (
+          {!hasSearched && !isSearching && (
             <p className="text-center text-sm text-gray-400 py-6">Cerca un titolo per iniziare 🔎</p>
           )}
 
@@ -185,30 +259,41 @@ export default function BookLibreria() {
               key={`${book.key}-${idx}`}
               className="flex items-center gap-3 p-3 border border-gray-100 rounded-2xl hover:border-gray-200 transition-colors"
             >
-              {book.cover_i ? (
+              {book.cover_url ? (
                 <img
-                  src={`https://covers.openlibrary.org/b/id/${book.cover_i}-S.jpg`}
+                  src={book.cover_url}
                   className="w-12 h-16 object-cover rounded-lg shrink-0"
                 />
               ) : (
-                <div className="w-12 h-16 bg-gray-100 rounded-lg shrink-0" />
+                <div className="w-12 h-16 bg-gray-100 rounded-lg shrink-0 flex items-center justify-center text-xl">📘</div>
               )}
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-xs truncate">{book.title}</h3>
-                {book.author_name?.[0] && (
-                  <p className="text-[11px] text-gray-400 truncate">{book.author_name[0]}</p>
-                )}
+                <p className="text-[11px] text-gray-400 truncate">{book.author_name[0]}</p>
               </div>
               <button
-                onClick={() => addRequest(book, format, language)}
+                onClick={() => addRequest(book)}
                 className="shrink-0 w-8 h-8 rounded-full bg-[var(--rose-dark)] text-white text-lg leading-none flex items-center justify-center hover:bg-opacity-90 transition"
                 aria-label="Aggiungi richiesta"
-                title={`Aggiungi in ${format === 'EPUB' ? 'EPUB' : 'Audio'} - ${language}`}
+                title={`Aggiungi in ${format} - ${language}`}
               >
                 +
               </button>
             </div>
           ))}
+
+          {/* BOTTONE FALLBACK MANUALE (Mostrato solo dopo aver effettuato una ricerca) */}
+          {hasSearched && !isSearching && searchQuery.trim() !== '' && (
+            <div className="mt-6 pt-4 border-t border-gray-100">
+              <p className="text-xs text-gray-500 text-center mb-2">Non trovi quello che cerchi?</p>
+              <button
+                onClick={addManualRequest}
+                className="w-full bg-white border-2 border-dashed border-gray-300 text-gray-600 p-3 rounded-xl font-bold hover:border-[var(--rose-dark)] hover:text-[var(--rose-dark)] transition-colors text-sm"
+              >
+                Invia "{searchQuery}" manualmente
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -222,7 +307,6 @@ export default function BookLibreria() {
               La tua Libreria 📚
             </h2>
             
-            {/* Barra dei Filtri */}
             {readyBooks.length > 0 && (
               <div className="flex flex-col gap-3">
                 <input 
@@ -258,16 +342,14 @@ export default function BookLibreria() {
                 <div key={req.id} className="flex flex-col bg-white p-5 rounded-3xl border-2 border-[var(--rose-light)] shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex gap-5 items-start">
                     
-                    {/* Copertina Grande */}
                     <div className="w-24 h-36 flex-shrink-0 bg-gray-100 rounded-xl overflow-hidden shadow-sm border border-gray-100">
                       {req.cover_url ? (
                         <img src={req.cover_url} className="w-full h-full object-cover" alt="Cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-3xl">📚</div>
+                        <div className="w-full h-full flex items-center justify-center text-3xl">📘</div>
                       )}
                     </div>
 
-                    {/* Dati Libro */}
                     <div className="flex-1 min-w-0 pt-1">
                       <div className="flex justify-between items-start gap-2">
                         <h3 className="font-extrabold text-lg text-gray-900 leading-tight line-clamp-2">{req.title}</h3>
@@ -292,7 +374,6 @@ export default function BookLibreria() {
                     </div>
                   </div>
 
-                  {/* Bottone Scarica */}
                   <a 
                     href={req.download_url} 
                     target="_blank" 
@@ -323,7 +404,7 @@ export default function BookLibreria() {
                   {req.cover_url ? (
                     <img src={req.cover_url} className="w-10 h-14 object-cover rounded-md shrink-0 grayscale" />
                   ) : (
-                    <div className="w-10 h-14 bg-gray-200 rounded-md shrink-0" />
+                    <div className="w-10 h-14 bg-gray-200 rounded-md shrink-0 flex items-center justify-center text-sm">📘</div>
                   )}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-xs text-gray-700 truncate">{req.title}</h3>
