@@ -64,6 +64,18 @@ export default function Navbar() {
           >
             <span>Libreria</span>
           </Link>
+
+          {/* NUOVO LINK CINEMA DESKTOP */}
+          <Link 
+            href={`${SECRET_PATH}/cinema`} 
+            className={`flex items-center gap-1.5 transition-colors pb-1 border-b-2 ${
+              isActive(`${SECRET_PATH}/cinema`) 
+                ? 'border-[var(--rose-dark)] text-[var(--rose-dark)]' 
+                : 'border-transparent text-gray-600 hover:text-[var(--rose-dark)]'
+            }`}
+          >
+            <span>Cinema</span>
+          </Link>
         </div>
 
         {/* BOTTONE HAMBURGER MOBILE (visibile solo su schermi piccoli) */}
@@ -119,6 +131,19 @@ export default function Navbar() {
             }`}
           >
             Libreria
+          </Link>
+
+          {/* NUOVO LINK CINEMA MOBILE */}
+          <Link 
+            href={`${SECRET_PATH}/cinema`} 
+            onClick={() => setIsOpen(false)}
+            className={`font-bold text-base transition-all pb-1 border-b-2 ${
+              isActive(`${SECRET_PATH}/cinema`) 
+                ? 'border-[var(--rose-dark)] text-[var(--rose-dark)]' 
+                : 'border-transparent text-gray-600 hover:text-[var(--rose-dark)]'
+            }`}
+          >
+            Cinema
           </Link>
         </div>
       )}
