@@ -76,6 +76,16 @@ export default function Navbar() {
           >
             <span>Cinema</span>
           </Link>
+          <Link 
+  href={`${SECRET_PATH}/serieTV`} 
+  className={`flex items-center gap-1.5 transition-colors pb-1 border-b-2 ${
+    isActive(`${SECRET_PATH}/serieTV`) 
+      ? 'border-[var(--rose-dark)] text-[var(--rose-dark)]' 
+      : 'border-transparent text-gray-600 hover:text-[var(--rose-dark)]'
+  }`}
+>
+  <span>Serie TV</span>
+</Link>
         </div>
 
         {/* BOTTONE HAMBURGER MOBILE (visibile solo su schermi piccoli) */}
@@ -145,6 +155,17 @@ export default function Navbar() {
           >
             Cinema
           </Link>
+          <Link 
+  href={`${SECRET_PATH}/serieTV`} 
+  onClick={() => setIsOpen(false)}
+  className={`font-bold text-base transition-all pb-1 border-b-2 ${
+    isActive(`${SECRET_PATH}/serieTV`) 
+      ? 'border-[var(--rose-dark)] text-[var(--rose-dark)]' 
+      : 'border-transparent text-gray-600 hover:text-[var(--rose-dark)]'
+  }`}
+>
+  Serie TV
+</Link>
         </div>
       )}
     </nav>
