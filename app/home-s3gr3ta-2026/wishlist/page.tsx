@@ -1,18 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-
-type WishlistItem = {
-  id: number;
-  title: string;
-  description: string | null;
-  category: string;
-  is_completed: boolean; 
-  priority: number; // Nuova colonna
-  created_at?: string;
-};
+import { WishlistItem } from '../lib/types';
+import { useToast } from '../components/ui/Toast';
 
 export default function Wishlist() {
+  const { showToast, confirmAction } = useToast();
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [activeCategory, setActiveCategory] = useState("Tutto");
   const [isLoading, setIsLoading] = useState(true);
@@ -21,22 +14,24 @@ export default function Wishlist() {
   const [newItem, setNewItem] = useState({ title: '', description: '', category: '', priority: 1 });
 
   useEffect(() => {
-    fetchItems();
-  }, []);
-
-  const fetchItems = async () => {
-    setIsLoading(true);
-    const { data, error } = await supabase
+    let ignore = false;
+    supabase
       .from('wishlist')
       .select('*')
-      // L'ordinamento principale lo facciamo lato client per renderlo reattivo alle modifiche al volo
-      .order('created_at', { ascending: false });
-    
-    if (!error && data) setItems(data);
-    setIsLoading(false);
-  };
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!ignore) {
+          if (!error && data) setItems(data as WishlistItem[]);
+          setIsLoading(false);
+        }
+      });
 
-  const uniqueCategories = Array.from(new Set(items.map(item => item.category))).filter(Boolean);
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const uniqueCategories = Array.from(new Set(items.map((item) => item.category))).filter(Boolean);
   const filterCategories = ["Tutto", ...uniqueCategories];
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -60,30 +55,31 @@ export default function Wishlist() {
       setNewItem({ title: '', description: '', category: '', priority: 1 });
       setIsAdding(false);
       setActiveCategory("Tutto"); 
+      showToast('Aggiunto alla Wishlist! ✨', 'success');
     }
   };
 
   const toggleDone = async (id: number, currentStatus: boolean) => {
-    setItems(items.map(item => item.id === id ? { ...item, is_completed: !currentStatus } : item));
+    setItems(items.map((item) => item.id === id ? { ...item, is_completed: !currentStatus } : item));
     await supabase.from('wishlist').update({ is_completed: !currentStatus }).eq('id', id);
   };
 
-  // Nuova funzione per cambiare la priorità al volo
   const updatePriority = async (id: number, newPriority: number) => {
-    setItems(items.map(item => item.id === id ? { ...item, priority: newPriority } : item));
+    setItems(items.map((item) => item.id === id ? { ...item, priority: newPriority } : item));
     await supabase.from('wishlist').update({ priority: newPriority }).eq('id', id);
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm("Sicura di voler cancellare questa voce?")) return;
+    const ok = await confirmAction("Sicura di voler cancellare questa voce?");
+    if (!ok) return;
     
-    setItems(items.filter(item => item.id !== id));
+    setItems(items.filter((item) => item.id !== id));
     await supabase.from('wishlist').delete().eq('id', id);
+    showToast('Voce rimossa dalla Wishlist', 'info');
   };
 
-  // Filtriamo e ORDiniAMO localmente (prima i non completati, poi per priorità alta, poi data)
   const filteredAndSortedItems = items
-    .filter(item => activeCategory === "Tutto" || item.category === activeCategory)
+    .filter((item) => activeCategory === "Tutto" || item.category === activeCategory)
     .sort((a, b) => {
       if (a.is_completed !== b.is_completed) return a.is_completed ? 1 : -1;
       if ((a.priority || 1) !== (b.priority || 1)) return (b.priority || 1) - (a.priority || 1);
@@ -100,7 +96,7 @@ export default function Wishlist() {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex flex-wrap gap-2">
-          {filterCategories.map(cat => (
+          {filterCategories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
@@ -132,7 +128,7 @@ export default function Wishlist() {
                 type="text" 
                 required
                 value={newItem.title}
-                onChange={e => setNewItem({...newItem, title: e.target.value})}
+                onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
                 className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--rose-light)]"
                 placeholder="Es. Prenotare hotel per il weekend"
               />
@@ -145,12 +141,12 @@ export default function Wishlist() {
                 list="category-suggestions"
                 required
                 value={newItem.category}
-                onChange={e => setNewItem({...newItem, category: e.target.value})}
+                onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
                 className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--rose-light)]"
                 placeholder="Es. Spesa..."
               />
               <datalist id="category-suggestions">
-                {uniqueCategories.map(c => <option key={c} value={c} />)}
+                {uniqueCategories.map((c) => <option key={c} value={c} />)}
               </datalist>
             </div>
 
@@ -158,7 +154,7 @@ export default function Wishlist() {
               <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Priorità</label>
               <select 
                 value={newItem.priority}
-                onChange={e => setNewItem({...newItem, priority: Number(e.target.value)})}
+                onChange={(e) => setNewItem({ ...newItem, priority: Number(e.target.value) })}
                 className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--rose-light)]"
               >
                 <option value={1}>Bassa</option>
@@ -172,7 +168,7 @@ export default function Wishlist() {
             <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Descrizione (Opzionale)</label>
             <textarea 
               value={newItem.description}
-              onChange={e => setNewItem({...newItem, description: e.target.value})}
+              onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
               className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--rose-light)]"
               placeholder="Dettagli aggiuntivi..."
               rows={2}
@@ -192,7 +188,7 @@ export default function Wishlist() {
             <p className="text-gray-500">Nessun elemento in questa categoria.</p>
           </div>
         ) : (
-          filteredAndSortedItems.map(item => (
+          filteredAndSortedItems.map((item) => (
             <div 
               key={item.id} 
               className={`bg-white rounded-xl p-4 shadow-sm border transition-all flex gap-4 ${
@@ -205,6 +201,7 @@ export default function Wishlist() {
                   checked={item.is_completed} 
                   onChange={() => toggleDone(item.id, item.is_completed)}
                   className="w-5 h-5 accent-[var(--rose-dark)] rounded cursor-pointer"
+                  aria-label={`Segna ${item.title} come completato`}
                 />
               </div>
               
@@ -224,6 +221,7 @@ export default function Wishlist() {
                         item.priority === 2 ? 'bg-orange-100 text-orange-600' :
                         'bg-gray-100 text-gray-500'
                       }`}
+                      aria-label="Priorità"
                     >
                       <option value={1}>Priorità: Bassa</option>
                       <option value={2}>Priorità: Media</option>

@@ -1,33 +1,59 @@
 @import "tailwindcss";
 
 :root {
-  /* I nostri colori base */
-  --brand-bg: #FCFBF9;     /* Bianco panna caldo */
-  --brand-text: #111827;   /* Grigio ardesia (niente nero puro) */
+  --brand-bg: #FCF9FA;
+  --brand-text: #111827;
   --rose-light: #FBCFE8;
   --rose-gold: #D9A09B;
   --rose-dark: #DA1884;
-  --brand-bg: #FCF9FA;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
 }
 
 body {
   background-color: var(--brand-bg);
+  background-image: 
+    radial-gradient(at 15% 0%, rgba(251, 207, 232, 0.35) 0px, transparent 50%),
+    radial-gradient(at 85% 5%, rgba(217, 160, 155, 0.18) 0px, transparent 45%);
+  background-attachment: fixed;
   color: var(--brand-text);
-  /* Opzionale: rende i font più definiti su schermi moderni */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-shake {
+  animation: shake 0.3s ease-in-out;
 }

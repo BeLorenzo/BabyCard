@@ -1,4 +1,4 @@
-import BookLibreria from '../components/BookLibreria'; // Adatta il percorso per risalire alla cartella components
+import BookLibreria from '../components/libreria/BookLibreria';
 
 export const metadata = {
   title: 'Libreria Condivisa | BabyPal',
@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function LibreriaPage() {
   return (
-    <main className="min-h-screen pt-12 px-4 pb-24 max-w-7xl mx-auto w-full">
+    <div className="pt-12 px-4 pb-24 max-w-7xl mx-auto w-full">
       <header className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3 text-[var(--brand-text)]">
           La <span className="text-[var(--rose-dark)]">Libreria</span> della Baby
@@ -17,6 +17,6 @@ export default function LibreriaPage() {
       </header>
 
       <BookLibreria />
-    </main>
+    </div>
   );
 }

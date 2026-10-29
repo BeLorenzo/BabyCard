@@ -1,44 +1,33 @@
-'use client'
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
-
-const LILO_IMAGES = Array.from({ length: 35 }, (_, i) => `/img/Lilo/Foto${i + 1}.jpg`);
+'use client';
+import { useState } from 'react';
+import { LILO_IMAGES } from '../lib/constants';
 
 type Message = {
-  sender: 'user' | 'lilo'
-  text?: string
-  image?: string
-}
+  sender: 'user' | 'lilo';
+  text?: string;
+  image?: string;
+};
 
 export default function LiloBot() {
-  const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [input, setInput] = useState('')
-  const [isTyping, setIsTyping] = useState(false)
-
-  // Il percorso segreto
-  const SECRET_PATH = '/home-s3gr3ta-2026'
-
-  // Autodistruzione se fuori dal percorso segreto
-  if (!pathname.startsWith(SECRET_PATH)) {
-    return null
-  }
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
 
   const handleSend = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim()) return
+    e.preventDefault();
+    if (!input.trim()) return;
 
-    setMessages(prev => [...prev, { sender: 'user', text: input }])
-    setInput('')
-    setIsTyping(true)
+    setMessages((prev) => [...prev, { sender: 'user', text: input }]);
+    setInput('');
+    setIsTyping(true);
 
     setTimeout(() => {
-      const randomImage = LILO_IMAGES[Math.floor(Math.random() * LILO_IMAGES.length)]
-      setIsTyping(false)
-      setMessages(prev => [...prev, { sender: 'lilo', image: randomImage }])
-    }, 1500)
-  }
+      const randomImage = LILO_IMAGES[Math.floor(Math.random() * LILO_IMAGES.length)];
+      setIsTyping(false);
+      setMessages((prev) => [...prev, { sender: 'lilo', image: randomImage }]);
+    }, 1500);
+  };
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
@@ -50,7 +39,11 @@ export default function LiloBot() {
               <span className="text-xl">🐾</span>
               <span className="tracking-wide">LiloBot</span>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors">
+            <button 
+              onClick={() => setIsOpen(false)} 
+              className="text-white/80 hover:text-white transition-colors"
+              aria-label="Chiudi chat"
+            >
               ✕
             </button>
           </div>
@@ -103,6 +96,7 @@ export default function LiloBot() {
               type="submit" 
               disabled={isTyping}
               className="bg-[var(--rose-dark)] text-white rounded-full w-9 h-9 flex items-center justify-center hover:opacity-80 transition-opacity disabled:opacity-50 shrink-0"
+              aria-label="Invia"
             >
               ↑
             </button>
@@ -113,8 +107,8 @@ export default function LiloBot() {
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="relative w-20 h-20 hover:scale-105 transition-transform group"
+        aria-label="Apri LiloBot"
       >
-        {/* Cerchio di sfondo: ora usa il rosa forte e pieno */}
         <div className="absolute inset-0 bg-[var(--rose-dark)] rounded-full border-4 border-white shadow-xl z-0 transition-colors group-hover:bg-opacity-80"></div>
         <img 
           src="/img/Lilo/lilo-sticker.png" 
@@ -123,5 +117,5 @@ export default function LiloBot() {
         />
       </button>
     </div>
-  )
+  );
 }

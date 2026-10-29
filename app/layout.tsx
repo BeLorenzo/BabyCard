@@ -1,36 +1,35 @@
-// app/layout.tsx
-import './globals.css'
-import Navbar from './home-s3gr3ta-2026/components/Navbar'
-import Footer from './home-s3gr3ta-2026/components/Footer'
-import LiloBot from './home-s3gr3ta-2026/components/LiloBot'
+import './globals.css';
+import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-jakarta',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+});
 
 export const metadata = {
-  title: 'BabyPal | Alessia',
-  description: 'La carta prepagata per i tuoi vizi',
-}
+  title: '404 - Page Not Found',
+  description: '',
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
-    <html lang="it">
-      {/* Aggiunto flex flex-col per gestire l'altezza e spingere il footer giù */}
-      <body className="min-h-screen font-sans flex flex-col">
-        
-        <Navbar />
-        
-        {/* flex-grow fa sì che il contenuto spinga il footer sul fondo anche se la pagina è mezza vuota */}
-        <main className="pt-20 flex-grow w-full">
-          {children}
-        </main>
-
-        <Footer />
-        
-        {/* Lilo Bot fisso in basso a destra (fluttuerà sopra il footer) */}
-        <LiloBot />
+    <html lang="it" className={`${jakarta.variable} ${jetbrainsMono.variable}`}>
+      <body className="min-h-screen font-sans flex flex-col selection:bg-[var(--rose-light)] selection:text-[var(--rose-dark)]">
+        {children}
       </body>
     </html>
-  )
+  );
 }
